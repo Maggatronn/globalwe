@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+button {
+  position: relative;
+}
+
+input {
+  color: white;
+  position: relative;
+  top: 1em;
+
+}
+label{
+  color: white;
+  position: relative;
+  top: 1em
+}
+
+#blue {
+  top: 1em;
+  left: 1em;
+}
+
+#orange {
+  top: 1em;
+  left: 8em;
+}
+
+#green {
+  top: 1em;
+  left: 16em;
+}
+body {
+  background-color: black;
+  /* height: 100%;
+  margin: 0;
+  width: 100%; */
+  /* float: left; */
+}
+svg {
+  background-color: black;
+  /* height: 100%;
+  margin: 0;
+  width: 100%; */
+  /* float: left; */
+}
+</style>
+<link href="https://fonts.googleapis.com/css?family=Saira:100,200,300,400,500,600,700,800,900" rel="stylesheet">
+<svg>
+</svg>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/p5@1.5.0/lib/p5.js"></script>
+<script
+  src="https://code.jquery.com/jquery-3.2.1.min.js"
+  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+  crossorigin="anonymous"></script>
+<div>
+  <input type="checkbox" class="myCheckbox" value="Emotions" checked><label>Emotions</label>
+  <input type="checkbox" class="myCheckbox" value="Power: Individual" unchecked><label>Power: Individual</label>
+  <input type="checkbox" class="myCheckbox" value="Culture" unchecked><label>Culture</label>
+  <input type="checkbox" class="myCheckbox" value="Problems and Solutions" unchecked><label>Problems and Solutions</label>
+  <input type="checkbox" class="myCheckbox" value="Power: Community" checked><label>Power: Community</label>
+  <input type="checkbox" class="myCheckbox" value="Power: Structural" checked><label>Power: Structural</label>
+</div>
+<script>
+var graph, store, audio;
+
+var width = $(window).width();
+var height = $(window).height();
+var nodes_list = []
+var svg = d3.select("svg").attr("width", width).attr("height", height);
+
+// var identity_dict = { '*identity of speaker': ['ability',
+//   'class',
+//   'race-ethnicity',
+//   'gender',
+//   'middle-aged',
+//   'family structure',
+//   'seniors-age strong',
+//   'parental status',
+//   'foreign-born',
+//   'young adults',
+//   'language',
+//   'youth',
+//   'foreign-born ',
+//   'formerly incarcerated']}
+//
+var topics_dict = {'Emotions': ['Concern',
+  'Caring',
+  'Love',
+  'Desire',
+  'Disconnection',
+  'Fear',
+  'Empathy',
+  'Happiness',
+  'Desperation',
+  'Anger',
+  'Anxiety',
+  'Loss/Grief',
+  'Surprise',
+  'Inspiration',
+  'Sadness',
+  'Curiosity'],
+ 'Power: Individual': ['Messages',
+  'Activism',
+  'Initiatives & Participation ',
+  'Awareness Raised',
+  'Personal Responsibility',
+  'Imagination & Creativity',
+  'Action Enabled',
+  'Inaction & Disconnection'],
+ 'Culture': ['Landscape',
+  'Customs & Traditions',
+  'Local Memories',
+  'Identity',
+  'Culture Shifts',
+  'Indigenous Erasure',
+  'Legacy/Heritage',
+  'Art',
+  'Agriculture & Farming',
+  'Music'],
+ 'Problems and Solutions': ['Hope for the Future',
+  'Possible Solutions',
+  'Urgent Problems',
+  'Global Empathy',
+  'Who Can Help',
+  'Takeaways from Conversation',
+  'Messages to Decisions Makers',
+  'Mental health',
+  'Environmental Loss',
+  'Recycling/Upcycling',
+  'Food Wastage',
+  'Misconception/Bias',
+  'Entrepreneurship'],
+ 'Power: Community': ['Learning Together',
+  'Work Together',
+  'Connecting Relationships',
+  'Global Coalitions',
+  'Neighborhoods',
+  'Local Networks'],
+ 'Power: Structural': ['Economy/Financial',
+  'Government Responsibility',
+  'Government',
+  'Inequality',
+  'Justice/Injustice',
+  'Corporate Responsibility',
+  'Politics',
+  'Schools or Education',
+  'NGOs or Nonprofits',
+  'Media/Social Media',
+  'Corporations',
+  'Healthcare']}
+
+var allGroup = Object.keys(topics_dict)
+
+var graph, store, link, links, node, nodes, typeFilterList, line;
+
+var graphLinks = []
+var graphNodes = []
+
+var simulation = d3.forceSimulation()
+    .force("link", d3.forceLink().id((d) => d.id).strength(1.5))
+    .force("center", d3.forceCenter(width/2, height/2))
+    .force("charge", d3.forceManyBody().strength(-150))
+    .force("collide", d3.forceCollide(5))
+
+
+var loading = svg.append("text")
+  .attr("dy", height/2)
+  .attr("dx", width/2)
+  .attr("text-anchor", "middle")
+  .attr("font-family", "sans-serif")
+  .attr('fill', 'white')
+  .attr("font-size", 10)
+  .text("Simulating. One moment please…");
+
+var nodeByID = {};
+var n = 10000;
+var topics_color = ["#F5770C", "#DE4600", "#E81C0C", "#F20C46", "#DB00A5", "#8E0CE8", "#0001DB", "#0C47F2", "#0C7DE8", "#00ACEB", "#0CF0F2"]
+var topics_color = ["#5D02D9", "#E803FC", "#FF009E", "#0F1FEF", "#0277D9", "#07FAF5"]
+var color = d3.scaleOrdinal().domain(Object.keys(topics_dict)).range(topics_color)
+var ultra_radius_labels = d3.scaleLinear().domain([0,700]).range([10,20])
+var ultra_radius = d3.scaleLinear().domain([0,2000]).range([5,30])
+var radius = d3.scaleLinear().domain([0,500]).range([3,10])
+var radius_highlight = d3.scaleLinear().domain([0,24]).range([1,5])
+var ecosystem_state = true;
+
+d3.json("globalwe.json", function(error, graph) {
+  if (error) throw error;
+
+  graph.nodes.forEach(function(n) {
+  		nodeByID[n.id] = n;
+  	});
+
+  typeFilterListLinks = []
+  typeFilterListNodes =[]
+
+  for (let i = 0; i < Object.keys(topics_dict).length; i++){
+    for (let x = 0; x < topics_dict[Object.keys(topics_dict)[i]].length; x++){
+        typeFilterListLinks.push(topics_dict[Object.keys(topics_dict)[i]][x])
+    }
+  }
+  for (let i = 0; i < Object.keys(topics_dict).length; i++){
+    for (let x = 0; x < topics_dict[Object.keys(topics_dict)[i]].length; x++){
+        typeFilterListNodes.push(topics_dict[Object.keys(topics_dict)[i]][x])
+    }
+  }
+
+  nodesToLookAt = []
+  var choices = [];
+  d3.selectAll(".myCheckbox").on("change", update);
+
+
+  graphed = graph;
+	store = $.extend(true, {}, graph);
+
+  graphNodes = graph.nodes.filter(function(d) {
+        return d
+  });
+
+  graphLinks = graph.edges.filter(function(d) {
+      // if (d.source.tag in choices && d.target.tag in choices){
+        return d
+      // }
+  });
+
+  simulation.nodes(graphNodes).on("tick", ticked);
+  simulation.force("link").links(graphLinks)
+
+      var tooltip = d3.select("body").append("g")
+         .style("opacity", 1)
+         .style("font", "8px sans-serif")
+         .attr("x", 0)
+         .attr("y", 0)
+         .style("position", "absolute")
+         .attr("class", "tooltip")
+         .style("border-radius", "5px")
+         .style("width", "500px")
+         .style("padding", "10x")
+         .html(graph.node)
+
+      svg.append("svg:rect")
+          .attr("width", width)
+          .attr("height", height)
+          .on("click", function(d) {
+            ecosystem_state = true;
+            tooltip
+              .transition()
+              .duration(500)
+              .style("opacity", 0)
+            d3.select(".nodes")
+              .transition()
+              .duration(500)
+              .selectAll("circle")
+              .style("fill-opacity", 1)
+            d3.select(".nodes")
+              .transition()
+              .duration(500)
+              .selectAll("text")
+              .style("opacity", (function(o){
+                if (o.group == 2){
+                  return 1
+                } if (o.group == 3){
+                  return 1
+                }
+              }))
+            d3.select(".links")
+              .transition()
+              .duration(500)
+              .selectAll("path")
+              .style("stroke", function(d){return color(d.parent)})
+              .style("stroke-width", 0.1)
+              .style('fill', "none")
+
+            });
+
+
+
+      link = svg.append("g")
+          .attr("class", "links")
+        .selectAll("path")
+        .data(graphLinks)
+        .enter()
+        .append("path")
+        .style("stroke", function(d){return color(d.parent)})
+        .style("stroke-width", 0.05)
+        // .style("stroke", "none")
+        .style('fill', "none")
+
+      node = svg.append("g")
+          .attr("class", "nodes")
+        .selectAll("g")
+        .data(graphNodes)
+        .enter().append("g")
+
+      var circles = node.append("circle")
+          .data(graphNodes)
+          .style("fill", function(o){
+            if(o.group > 1){
+              return color(o.parent)
+            } if(o.group == 1){
+              return "white"
+            }})
+
+            .attr("r", function(o){
+              if(o.group == 2){
+                return radius(o.degree)
+              } if(o.group == 1) {
+                  return 1 + Math.random() * 1
+              } if(o.group == 3) {
+                return ultra_radius(o.degree)
+              }
+            })
+          .on("click", function(d){
+            ecosystem_state = false;
+            if (d.focus == false) {
+              d.focus = true;
+              // console.log('heyo', d)
+            } else {
+                d.focus = false
+            }})
+          .on("mouseover", (d) => mouseOver(d))
+
+          .on("mouseout", function(d) {
+            d3.select(".nodes")
+              .transition()
+              .duration(500)
+              .selectAll("circle")
+            d3.select(".links")
+              .data(graphLinks)
+                .enter().append("path")
+                .style("stroke", function(d){return color(d.target)})
+                .style('stroke-width', 0.05)
+                .style("fill", "none")
+          })
+
+        var theme_label = node.append("text")
+            .attr("class", "labels")
+            .data(graph.nodes)
+            .attr("text-anchor", "middle")
+            .attr("font-family", "sans-serif")
+            .attr("font-size", o => ultra_radius_labels(o.degree))
+            .attr('fill', 'white')
+            .text(function(o){
+              if (o.group == 2){
+                return o.tag
+              } if (o.group == 3){
+                return o.parent
+              }
+            })
+            .attr('opacity', (function(o){
+              if (o.group == 2){
+                return 1
+              } if (o.group == 3){
+                return 1
+              }
+            }))
+
+
+      update();
+
+      function update(){
+        d3.selectAll(".myCheckbox").each(function(d){
+          cb = d3.select(this);
+          if(cb.property("checked") && !(choices.includes(cb.property("value")))){
+            choices.push(cb.property("value"))
+          } if (!(cb.property("checked")) && (choices.includes(cb.property("value")))){
+            var value_index = choices.indexOf(cb.property("value"));
+            choices.splice(value_index, 1)
+          }
+          console.log(choices)
+        });
+
+        graphNodes = graph.nodes.filter(function(d) {
+          if(d.group == 1){
+            for(i in d.parents){
+              tag = String(d.parents[i])
+              if (choices.includes(tag)){
+                if(!(nodes_list.includes(d.id))){ nodes_list.push(d.id) }
+                return d }
+            }
+          } else {
+            if (choices.includes(d.parent)){ return d }
+          }
+        });
+        graphLinks = graph.edges.filter(function(d) {
+            if (choices.includes(d.parent)){ return d }
+        });
+        restart();
+      }
+
+    function mouseOver(d) {
+        console.log(d)
+        if (d.group == 1){
+          tooltip
+            .transition()
+          tooltip
+            .style("opacity", 1)
+            .style("font", "8px sans-serif")
+            .style("padding", "10px")
+            .html(graph.node)
+            .style("left", String(width - 450) + "px")
+            .style("top",  30 + "px")
+            .html('<iframe src="https://embed.lvn.org/?hid=' + d.highlight + ' width="100%" height="425" scrolling="no" frameborder="no" style="max-width: 850px; margin: 0 auto; display: block"></iframe>')
+        }
+
+        d3.select(".nodes")
+          .transition()
+          .duration(500)
+          .selectAll("circle")
+          .attr("opacity", (o) => opacityFunction(o, d))
+        d3.select(".nodes")
+          .transition()
+          .duration(500)
+          .selectAll("text")
+          .style("fill",'white')
+          .style("opacity", function(o){
+            if (o.group == 1 && d.group == 1){
+                if ((o.tags) == (d.tags)) {
+                  return 1
+                } else {
+                return 0
+              }
+            } if (o.group == 1 && d.group == 3){
+                if ((o.parents).includes(d.parent)) {
+                  return 1
+                } else {
+                return 0.2
+              }
+            } if (o.group == 2 && d.group == 1){
+                if ((d.tags).includes(o.tag)) {
+                  return 1
+                } else {
+                return 0
+              }
+            } if (o.group == 2 && d.group == 2 && d.id != o.id){
+                return 0
+              }
+              if (d.id == o.id){
+                  return 1
+            } if (o.group == 2 && d.group == 3){
+                if ((d.parent).includes(o.parent)) {
+                  return 1
+                } else {
+                return 0
+              }
+            } if (o.group == 3 && d.group == 2){
+                if ((d.parent).includes(o.parent)) {
+                  return 1
+                } else {
+                return 0
+              }
+            } if (o.group == 3 && d.group == 1){
+                if ((d.parents).includes(o.parent)) {
+                  return 1
+                } else {
+                return 0.2
+              }
+            }if (o.group == 3 && d.group == 3 && d.id != o.id){
+                return 0.2
+              }
+          })
+        d3.select(".links")
+          .transition()
+          .duration(500)
+          .selectAll("path")
+          .style("fill-opacity", function(o){if(d.group ==  1 && (o.source.id == d.id || o.target.id == d.id)){return 0.3} else{return 0}})
+          .style("fill", function(o){if(d.group ==  1 && (o.source.id == d.id || o.target.id == d.id)){return color(o.parent)} else{return 'none'}})
+          .style("stroke-width", function(o){if(d.group ==  1 && (o.source.id == d.id || o.target.id == d.id)){return 1} else{return 0.05}})
+    }
+
+
+    function opacityFunction(o, d){
+      console.log("opacity", d, o)
+          if (o.group == 1 && d.group == 2) {
+              if ((o.tags).includes(d.tag)) {
+                return 1
+              } else {
+              return 0.2
+            }
+          } if (o.group == 1 && d.group == 3) {
+              if ((o.parents).includes(d.parent)) {
+                return 1
+              } else {
+              return 0.2
+            }
+          } if (o.group == 2 && d.group == 2 && d.id != o.id) {
+              return 0.2
+            } if (o.group == 2 && d.group == 3){
+              if ((d.parent).includes(o.parent)) {
+                return 1
+              } else {
+              return 0.2
+            }
+          }
+          if (o.group == 3 && d.group == 1){
+              if ((d.parents).includes(o.parent)) {
+                return 1
+              } else {
+              return 0.2
+            }
+          }
+          if (o.group == 3 && d.group == 3 && d.id != o.id){
+              return 0.2
+            }
+        }
+
+
+    function restart() {
+      console.log(graphNodes)
+      // Apply the general update pattern to the nodes.
+      node = node.data(graphNodes, function(d) { return d.id;});
+      node.exit().remove();
+
+      var newNode = node.enter().append("circle")
+      		.attr("class", "node")
+          .style("fill", function(o){
+            if(o.group > 1){
+              return color(o.parent)
+            } if(o.group == 1){
+              return "white"
+            }})
+          .style("fill-opacity", function(o){
+              if (ecosystem_state == false){
+                if (o.focus == true){
+                  return 1
+                } else {
+                  return 0.2
+                }
+              } else {
+                return 0.65
+              }
+            })
+          .attr("r", function(o){
+            if(o.group == 2){
+              return radius(o.degree)
+            } if(o.group == 1) {
+                return 1 + Math.random() * 1
+            } if(o.group == 3) {
+              return ultra_radius(o.degree)
+            }
+          })
+          .on("mouseover", (d) => mouseOver(d))
+
+
+      var new_theme_label = node.append("text")
+              .attr("class", "labels")
+              .data(graphNodes)
+              .attr("text-anchor", "middle")
+              .attr("font-family", "sans-serif")
+              .attr("font-size", o => ultra_radius_labels(o.degree))
+              .attr('fill', 'white')
+              .text(function(o){if (o.group > 1){ return o.tag }})
+              .attr('opacity', (function(o){ if (o.group > 1){ return 1 }}))
+
+
+
+      // node = node.data(graphNodes).enter().append("circle").merge(newNode);
+      node = node.merge(newNode);
+      node = node.merge(new_theme_label);
+
+
+
+      // Apply the general update pattern to the links.
+      link = link.data(graphLinks, function(d) { return d.source.id + "-" + d.target.id; });
+      link.exit().remove();
+      var	newLink = link.enter().append("path")
+      		.attr("class", "link");
+      link = link.merge(newLink);
+
+      // Update and restart the simulation.
+      simulation.nodes(graphNodes);
+      simulation.force("link").links(graphLinks);
+      simulation.alpha(0.7).restart();
+    }
+
+});
+
+function ticked(data) {
+    link
+      .attr("d", function(d) {
+        var offset = 200;
+
+        var midpoint_x = (d.source.x + d.target.x) / 2;
+        var midpoint_y = (d.source.y + d.target.y) / 2;
+
+        var dx = (d.target.x - d.source.x);
+        var dy = (d.target.y - d.source.y);
+
+        var normalise = Math.sqrt((dx * dx) + (dy * dy));
+        if (normalise > 0){
+          var offSetX = midpoint_x + offset*(dy/normalise);
+          var offSetY = midpoint_y - offset*(dx/normalise);
+        } else {
+          var offSetX = midpoint_x + offset*(dy);
+          var offSetY = midpoint_y - offset*(dx);
+        }
+
+        return "M" + d.source.x + "," + d.source.y +
+            "S" + offSetX + "," + offSetY +
+            " " + d.target.x + "," + d.target.y;
+        });
+
+    node
+        .attr("transform", function(d) {
+          return "translate(" + Math.max(-30, Math.min(width+30, d.x)) + "," + Math.max(-30, Math.min(height+30, d.y)) + ")";
+        })
+  }
+
+
+
+
+
+
+</script>
