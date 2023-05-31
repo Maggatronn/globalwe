@@ -59,11 +59,11 @@ svg {
   crossorigin="anonymous"></script>
 <div>
   <input type="checkbox" class="myCheckbox" value="Emotions" checked><label>Emotions</label>
-  <input type="checkbox" class="myCheckbox" value="Power: Individual" unchecked><label>Power: Individual</label>
+  <input type="checkbox" class="myCheckbox" value="Power: Individual" unchecked><label>Power of the Individual</label>
   <input type="checkbox" class="myCheckbox" value="Culture" unchecked><label>Culture</label>
   <input type="checkbox" class="myCheckbox" value="Problems and Solutions" unchecked><label>Problems and Solutions</label>
-  <input type="checkbox" class="myCheckbox" value="Power: Community" checked><label>Power: Community</label>
-  <input type="checkbox" class="myCheckbox" value="Power: Structural" checked><label>Power: Structural</label>
+  <input type="checkbox" class="myCheckbox" value="Power: Community" checked><label>Community</label>
+  <input type="checkbox" class="myCheckbox" value="Power: Structural" checked><label>Structural Influences</label>
 </div>
 <script>
 var graph, store, audio;
@@ -198,16 +198,16 @@ d3.json("globalwe.json", function(error, graph) {
   typeFilterListLinks = []
   typeFilterListNodes =[]
 
-  for (let i = 0; i < Object.keys(topics_dict).length; i++){
-    for (let x = 0; x < topics_dict[Object.keys(topics_dict)[i]].length; x++){
-        typeFilterListLinks.push(topics_dict[Object.keys(topics_dict)[i]][x])
-    }
-  }
-  for (let i = 0; i < Object.keys(topics_dict).length; i++){
-    for (let x = 0; x < topics_dict[Object.keys(topics_dict)[i]].length; x++){
-        typeFilterListNodes.push(topics_dict[Object.keys(topics_dict)[i]][x])
-    }
-  }
+  // for (let i = 0; i < Object.keys(topics_dict).length; i++){
+  //   for (let x = 0; x < topics_dict[Object.keys(topics_dict)[i]].length; x++){
+  //       typeFilterListLinks.push(topics_dict[Object.keys(topics_dict)[i]][x])
+  //   }
+  // }
+  // for (let i = 0; i < Object.keys(topics_dict).length; i++){
+  //   for (let x = 0; x < topics_dict[Object.keys(topics_dict)[i]].length; x++){
+  //       typeFilterListNodes.push(topics_dict[Object.keys(topics_dict)[i]][x])
+  //   }
+  // }
 
   nodesToLookAt = []
   var choices = [];
@@ -318,7 +318,6 @@ d3.json("globalwe.json", function(error, graph) {
             ecosystem_state = false;
             if (d.focus == false) {
               d.focus = true;
-              // console.log('heyo', d)
             } else {
                 d.focus = false
             }})
@@ -348,7 +347,15 @@ d3.json("globalwe.json", function(error, graph) {
               if (o.group == 2){
                 return o.tag
               } if (o.group == 3){
-                return o.parent
+                if (o.parent == "Power: Structural"){
+                  return "Structural Influences"
+                } if (o.parent == "Power: Community"){
+                  return "Community"
+                } if (o.parent == "Power: Individual"){
+                  return "Power of the Individual"
+                } else {
+                  return o.parent
+                }
               }
             })
             .attr('opacity', (function(o){
@@ -371,7 +378,6 @@ d3.json("globalwe.json", function(error, graph) {
             var value_index = choices.indexOf(cb.property("value"));
             choices.splice(value_index, 1)
           }
-          console.log(choices)
         });
 
         graphNodes = graph.nodes.filter(function(d) {
@@ -393,7 +399,6 @@ d3.json("globalwe.json", function(error, graph) {
       }
 
     function mouseOver(d) {
-        console.log(d)
         if (d.group == 1){
           tooltip
             .transition()
@@ -417,52 +422,7 @@ d3.json("globalwe.json", function(error, graph) {
           .duration(500)
           .selectAll("text")
           .style("fill",'white')
-          .style("opacity", function(o){
-            if (o.group == 1 && d.group == 1){
-                if ((o.tags) == (d.tags)) {
-                  return 1
-                } else {
-                return 0
-              }
-            } if (o.group == 1 && d.group == 3){
-                if ((o.parents).includes(d.parent)) {
-                  return 1
-                } else {
-                return 0.2
-              }
-            } if (o.group == 2 && d.group == 1){
-                if ((d.tags).includes(o.tag)) {
-                  return 1
-                } else {
-                return 0
-              }
-            } if (o.group == 2 && d.group == 2 && d.id != o.id){
-                return 0
-              }
-              if (d.id == o.id){
-                  return 1
-            } if (o.group == 2 && d.group == 3){
-                if ((d.parent).includes(o.parent)) {
-                  return 1
-                } else {
-                return 0
-              }
-            } if (o.group == 3 && d.group == 2){
-                if ((d.parent).includes(o.parent)) {
-                  return 1
-                } else {
-                return 0
-              }
-            } if (o.group == 3 && d.group == 1){
-                if ((d.parents).includes(o.parent)) {
-                  return 1
-                } else {
-                return 0.2
-              }
-            }if (o.group == 3 && d.group == 3 && d.id != o.id){
-                return 0.2
-              }
-          })
+          .style("opacity", (o) => opacityFunction(o, d))
         d3.select(".links")
           .transition()
           .duration(500)
@@ -474,7 +434,6 @@ d3.json("globalwe.json", function(error, graph) {
 
 
     function opacityFunction(o, d){
-      console.log("opacity", d, o)
           if (o.group == 1 && d.group == 2) {
               if ((o.tags).includes(d.tag)) {
                 return 1
@@ -510,30 +469,29 @@ d3.json("globalwe.json", function(error, graph) {
 
 
     function restart() {
-      console.log(graphNodes)
       // Apply the general update pattern to the nodes.
       node = node.data(graphNodes, function(d) { return d.id;});
+
       node.exit().remove();
 
-      var newNode = node.enter().append("circle")
+      var newNode = svg.append("g")
+          .attr("class", "nodes")
+        .selectAll("g")
+        .data(graphNodes)
+        .enter().append("g")
+
+      var newCircle = newNode.append("circle")
       		.attr("class", "node")
+          .data(graphNodes)
           .style("fill", function(o){
             if(o.group > 1){
               return color(o.parent)
-            } if(o.group == 1){
+            } else {
               return "white"
             }})
-          .style("fill-opacity", function(o){
-              if (ecosystem_state == false){
-                if (o.focus == true){
-                  return 1
-                } else {
-                  return 0.2
-                }
-              } else {
-                return 0.65
-              }
-            })
+          .attr("fill-opacity", function(o){
+            return 1
+          })
           .attr("r", function(o){
             if(o.group == 2){
               return radius(o.degree)
@@ -546,23 +504,29 @@ d3.json("globalwe.json", function(error, graph) {
           .on("mouseover", (d) => mouseOver(d))
 
 
-      var new_theme_label = node.append("text")
+      var new_theme_label = newNode.append("text")
               .attr("class", "labels")
               .data(graphNodes)
               .attr("text-anchor", "middle")
               .attr("font-family", "sans-serif")
               .attr("font-size", o => ultra_radius_labels(o.degree))
               .attr('fill', 'white')
-              .text(function(o){if (o.group > 1){ return o.tag }})
+              .text(function(o){if (o.group == 2){ return o.tag }
+                if (o.group == 3){
+                  if (o.parent == "Power: Structural"){
+                    return "Structural Influences"
+                  } if (o.parent == "Power: Community"){
+                    return "Community"
+                  } if (o.parent == "Power: Individual"){
+                    return "Power of the Individual"
+                  } else {
+                    return o.parent
+                  }
+                }
+              })
               .attr('opacity', (function(o){ if (o.group > 1){ return 1 }}))
 
-
-
-      // node = node.data(graphNodes).enter().append("circle").merge(newNode);
       node = node.merge(newNode);
-      node = node.merge(new_theme_label);
-
-
 
       // Apply the general update pattern to the links.
       link = link.data(graphLinks, function(d) { return d.source.id + "-" + d.target.id; });
@@ -609,9 +573,6 @@ function ticked(data) {
           return "translate(" + Math.max(-30, Math.min(width+30, d.x)) + "," + Math.max(-30, Math.min(height+30, d.y)) + ")";
         })
   }
-
-
-
 
 
 
