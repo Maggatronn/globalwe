@@ -2,54 +2,83 @@
 <meta charset="utf-8">
 <style>
 
-button {
-  position: relative;
-}
 
-input {
+input.myCheckbox {
   color: white;
-  position: relative;
-  top: 1em;
-
+  width: 20px;
+  height: 20px;
+  top: 10em;
 }
 label{
   color: white;
-  position: relative;
-  top: 1em
+  font-family: Roboto;
+  top: 10em;
+
 }
 
-#blue {
-  top: 1em;
-  left: 1em;
-}
-
-#orange {
-  top: 1em;
-  left: 8em;
-}
-
-#green {
-  top: 1em;
-  left: 16em;
-}
-body {
-  background-color: black;
-  /* height: 100%;
-  margin: 0;
-  width: 100%; */
-  /* float: left; */
-}
 svg {
   background-color: black;
-  /* height: 100%;
-  margin: 0;
-  width: 100%; */
-  /* float: left; */
+  position: absolute;
+}
+
+header {
+  color: white;
+  position: fixed;
+  font-family: Roboto;
+  top: 0em
+}
+
+p {
+  width: 500px;
+}
+
+div {
+  position: relative;
+  width: 300px;
+}
+
+div.blocker {
+  position: fixed;
+  width: 100px;
+  height: 100px;
+  top: 0em;
+  left: 0em;
+  background-color: black;
+}
+
+
+body {
+  background-color: black;
+  position: relative;
 }
 </style>
-<link href="https://fonts.googleapis.com/css?family=Saira:100,200,300,400,500,600,700,800,900" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Roboto:100,200,300,400,500,600,700,800,900" rel="stylesheet">
 <svg>
 </svg>
+<div class="blocker"></div>
+<header>
+  <h1>Global We Galaxy</h1>
+
+    <p>The voices of Global We are vast, complex, and interconnected.
+      How might we communicate that artistically? This question has guided the data art and visualization, Global We Galaxy.
+      Explore each voice, all it's interconnections, and the connections across various themes in this galaxy network graph.</p>
+    <p>Each white dot is one voice, and the colored dots are the themes that emerged throughout the conversations.
+    Every whitee dot is connected to the themes it is tagged with by colored lines. Forces then pull on the dots so those with similar patterns
+    and connections lie near one another.</p>
+    <p>Hover over each white dot to listen to that voice and see the themes it was tagged with. Hover over the colored dots to see
+      what voices have been tagged with what theme. Filter by parent themes by clicking the check boxes below to see how different themes and
+    subthemes interact. We recommend choosing no more than 3 parent themes at a time.</p>
+      <div>
+        <p><input type="checkbox" class="myCheckbox" value="Emotions" checked><label>Emotions</label></p>
+        <p><input type="checkbox" class="myCheckbox" value="Power: Individual" unchecked><label>Power of the Individual</label></p>
+        <p><input type="checkbox" class="myCheckbox" value="Culture" unchecked><label>Culture</label></p>
+        <p><input type="checkbox" class="myCheckbox" value="Problems and Solutions" unchecked><label>Problems and Solutions</label></p>
+        <p><input type="checkbox" class="myCheckbox" value="Power: Community" checked><label>Community</label></p>
+        <p><input type="checkbox" class="myCheckbox" value="Power: Structural" checked><label>Structural Influences</label></p>
+      </div>
+</header>
+
+<body></body>
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/p5@1.5.0/lib/p5.js"></script>
@@ -57,14 +86,6 @@ svg {
   src="https://code.jquery.com/jquery-3.2.1.min.js"
   integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
   crossorigin="anonymous"></script>
-<div>
-  <input type="checkbox" class="myCheckbox" value="Emotions" checked><label>Emotions</label>
-  <input type="checkbox" class="myCheckbox" value="Power: Individual" unchecked><label>Power of the Individual</label>
-  <input type="checkbox" class="myCheckbox" value="Culture" unchecked><label>Culture</label>
-  <input type="checkbox" class="myCheckbox" value="Problems and Solutions" unchecked><label>Problems and Solutions</label>
-  <input type="checkbox" class="myCheckbox" value="Power: Community" checked><label>Community</label>
-  <input type="checkbox" class="myCheckbox" value="Power: Structural" checked><label>Structural Influences</label>
-</div>
 <script>
 var graph, store, audio;
 
@@ -88,7 +109,15 @@ var svg = d3.select("svg").attr("width", width).attr("height", height);
 //   'foreign-born ',
 //   'formerly incarcerated']}
 //
-var topics_dict = {'Emotions': ['Concern',
+var topics_dict = { 'Power: Individual': ['Messages',
+  'Activism',
+  'Initiatives & Participation ',
+  'Awareness Raised',
+  'Personal Responsibility',
+  'Imagination & Creativity',
+  'Action Enabled',
+  'Inaction & Disconnection'],
+  'Emotions': ['Concern',
   'Caring',
   'Love',
   'Desire',
@@ -104,24 +133,6 @@ var topics_dict = {'Emotions': ['Concern',
   'Inspiration',
   'Sadness',
   'Curiosity'],
- 'Power: Individual': ['Messages',
-  'Activism',
-  'Initiatives & Participation ',
-  'Awareness Raised',
-  'Personal Responsibility',
-  'Imagination & Creativity',
-  'Action Enabled',
-  'Inaction & Disconnection'],
- 'Culture': ['Landscape',
-  'Customs & Traditions',
-  'Local Memories',
-  'Identity',
-  'Culture Shifts',
-  'Indigenous Erasure',
-  'Legacy/Heritage',
-  'Art',
-  'Agriculture & Farming',
-  'Music'],
  'Problems and Solutions': ['Hope for the Future',
   'Possible Solutions',
   'Urgent Problems',
@@ -135,12 +146,16 @@ var topics_dict = {'Emotions': ['Concern',
   'Food Wastage',
   'Misconception/Bias',
   'Entrepreneurship'],
- 'Power: Community': ['Learning Together',
-  'Work Together',
-  'Connecting Relationships',
-  'Global Coalitions',
-  'Neighborhoods',
-  'Local Networks'],
+  'Culture': ['Landscape',
+   'Customs & Traditions',
+   'Local Memories',
+   'Identity',
+   'Culture Shifts',
+   'Indigenous Erasure',
+   'Legacy/Heritage',
+   'Art',
+   'Agriculture & Farming',
+   'Music'],
  'Power: Structural': ['Economy/Financial',
   'Government Responsibility',
   'Government',
@@ -152,7 +167,13 @@ var topics_dict = {'Emotions': ['Concern',
   'NGOs or Nonprofits',
   'Media/Social Media',
   'Corporations',
-  'Healthcare']}
+  'Healthcare'],
+'Power: Community': ['Learning Together',
+ 'Work Together',
+ 'Connecting Relationships',
+ 'Global Coalitions',
+ 'Neighborhoods',
+ 'Local Networks'],}
 
 var allGroup = Object.keys(topics_dict)
 
@@ -163,7 +184,7 @@ var graphNodes = []
 
 var simulation = d3.forceSimulation()
     .force("link", d3.forceLink().id((d) => d.id).strength(1.5))
-    .force("center", d3.forceCenter(width/2, height/2))
+    .force("center", d3.forceCenter(width/2 + 150, height/2))
     .force("charge", d3.forceManyBody().strength(-150))
     .force("collide", d3.forceCollide(5))
 
@@ -172,15 +193,16 @@ var loading = svg.append("text")
   .attr("dy", height/2)
   .attr("dx", width/2)
   .attr("text-anchor", "middle")
-  .attr("font-family", "sans-serif")
+  .attr("font-family", "Roboto")
   .attr('fill', 'white')
   .attr("font-size", 10)
   .text("Simulating. One moment please…");
 
 var nodeByID = {};
 var n = 10000;
-var topics_color = ["#F5770C", "#DE4600", "#E81C0C", "#F20C46", "#DB00A5", "#8E0CE8", "#0001DB", "#0C47F2", "#0C7DE8", "#00ACEB", "#0CF0F2"]
+// var topics_color = ["#F5770C", "#DE4600", "#E81C0C", "#F20C46", "#DB00A5", "#8E0CE8", "#0001DB", "#0C47F2", "#0C7DE8", "#00ACEB", "#0CF0F2"]
 var topics_color = ["#5D02D9", "#E803FC", "#FF009E", "#0F1FEF", "#0277D9", "#07FAF5"]
+// var topics_color = ["#85457C", "#F58A07", "#909CC2", "#AE759F", "#C38D94", "#D36135"]
 var color = d3.scaleOrdinal().domain(Object.keys(topics_dict)).range(topics_color)
 var ultra_radius_labels = d3.scaleLinear().domain([0,700]).range([10,20])
 var ultra_radius = d3.scaleLinear().domain([0,2000]).range([5,30])
@@ -222,131 +244,320 @@ d3.json("globalwe.json", function(error, graph) {
   });
 
   graphLinks = graph.edges.filter(function(d) {
-      // if (d.source.tag in choices && d.target.tag in choices){
         return d
-      // }
   });
 
   simulation.nodes(graphNodes).on("tick", ticked);
   simulation.force("link").links(graphLinks)
 
-      var tooltip = d3.select("body").append("g")
-         .style("opacity", 1)
-         .style("font", "8px sans-serif")
-         .attr("x", 0)
-         .attr("y", 0)
-         .style("position", "absolute")
-         .attr("class", "tooltip")
-         .style("border-radius", "5px")
-         .style("width", "500px")
-         .style("padding", "10x")
-         .html(graph.node)
+  var tooltip = d3.select("body").append("g")
+     .style("opacity", 0)
+     .style("font", "8px sans-serif")
+     .attr("x", 0)
+     .attr("y", 0)
+     .style("position", "absolute")
+     .attr("class", "tooltip")
+     .style("border-radius", "5px")
+     .attr('fill', 'white')
+     .style("padding", "10x")
 
-      svg.append("svg:rect")
-          .attr("width", width)
-          .attr("height", height)
-          .on("click", function(d) {
-            ecosystem_state = true;
-            tooltip
-              .transition()
-              .duration(500)
-              .style("opacity", 0)
-            d3.select(".nodes")
-              .transition()
-              .duration(500)
-              .selectAll("circle")
-              .style("fill-opacity", 1)
-            d3.select(".nodes")
-              .transition()
-              .duration(500)
-              .selectAll("text")
-              .style("opacity", (function(o){
-                if (o.group == 2){
-                  return 1
-                } if (o.group == 3){
-                  return 1
-                }
-              }))
-            d3.select(".links")
-              .transition()
-              .duration(500)
-              .selectAll("path")
-              .style("stroke", function(d){return color(d.parent)})
-              .style("stroke-width", 0.1)
-              .style('fill', "none")
+  svg.append("svg:rect")
+      .attr("width", width)
+      .attr("height", height)
+      .on("click", function(d) {
+        ecosystem_state = true;
+        tooltip
+          .transition()
+          .duration(500)
+          .style("opacity", 0)
+        d3.select(".nodes")
+          .transition()
+          .duration(500)
+          .selectAll("circle")
+          .style("fill-opacity", 1)
+        d3.select(".nodes")
+          .transition()
+          .duration(500)
+          .selectAll("text")
+          .style("opacity", (function(o){
+            if (o.group == 2){
+              return 1
+            } if (o.group == 3){
+              return 1
+            }
+          }))
+        d3.select(".links")
+          .transition()
+          .duration(500)
+          .selectAll("path")
+          .style("stroke", function(d){return color(d.parent)})
+          .style("stroke-width", 0.1)
+          .style('fill', "none")
 
-            });
-
+        });
 
 
-      link = svg.append("g")
-          .attr("class", "links")
-        .selectAll("path")
-        .data(graphLinks)
-        .enter()
-        .append("path")
-        .style("stroke", function(d){return color(d.parent)})
-        .style("stroke-width", 0.05)
-        // .style("stroke", "none")
-        .style('fill', "none")
 
-      node = svg.append("g")
-          .attr("class", "nodes")
-        .selectAll("g")
-        .data(graphNodes)
-        .enter().append("g")
+  link = svg.append("g")
+      .attr("class", "links")
+    .selectAll("path")
+    .data(graphLinks)
+    .enter()
+    .append("path")
+    .style("stroke", function(d){return color(d.parent)})
+    .style("stroke-width", 0.05)
+    // .style("stroke", "none")
+    .style('fill', "none")
 
-      var circles = node.append("circle")
+  node = svg.append("g")
+      .attr("class", "nodes")
+    .selectAll("g")
+    .data(graphNodes)
+    .enter().append("g")
+
+  update();
+
+  function update(){
+    d3.selectAll(".myCheckbox").each(function(d){
+      cb = d3.select(this);
+      if(cb.property("checked") && !(choices.includes(cb.property("value")))){
+        choices.push(cb.property("value"))
+      } if (!(cb.property("checked")) && (choices.includes(cb.property("value")))){
+        var value_index = choices.indexOf(cb.property("value"));
+        choices.splice(value_index, 1)
+      }
+    });
+
+  var circles = node.append("circle")
+      .data(graphNodes)
+      .style("fill", function(o){
+
+          if(o.group > 1){
+            if(choices.includes(o.parent)){
+              return color(o.parent)
+            } else {return "black"}
+          } if(o.group == 1){
+            return "white"
+          }
+        })
+
+      .attr("r", function(o){
+        if(o.group == 2){
+          return radius(o.degree)
+        } if(o.group == 1) {
+            return 1 + Math.random() * 1
+        } if(o.group == 3) {
+          return ultra_radius(o.degree)
+        }
+      })
+      .on("click", function(d){
+        ecosystem_state = false;
+        if (d.focus == false) {
+          d.focus = true;
+        } else {
+            d.focus = false
+        }})
+        .on("mouseover", function(d){
+          if (d.group == 1){
+          tooltip
+            .transition()
+          tooltip
+            .style("opacity", 1)
+            .style("font", "8px sans-serif")
+            .style("padding", "10px")
+            .html(graphNodes)
+            .style("left", width - 350 + "px")
+            .style("top",  "100 px")
+            .html('<iframe src="https://embed.lvn.org/?hid=' + d.highlight + ' width="100%" height="425" scrolling="no" frameborder="no" style="max-width: 850px; margin: 0 auto; display: block"></iframe>')
+          console.log(d.highlight)
+        }
+        mouseOver(d)
+      })
+
+      .on("mouseout", function(d) {
+        d3.select(".nodes")
+          .transition()
+          .duration(500)
+          .selectAll("circle")
+        d3.select(".links")
+          .data(graphLinks)
+            .enter().append("path")
+            .style("stroke", function(d){return color(d.target)})
+            .style('stroke-width', 0.05)
+            .style("fill", "none")
+      })
+
+      var theme_label = node.append("text")
+          .attr("class", "labels")
           .data(graphNodes)
-          .style("fill", function(o){
+          .attr("text-anchor", "middle")
+          .attr("font-family", "Roboto")
+          .attr("font-size", o => ultra_radius_labels(o.degree))
+          .attr('fill', 'white')
+          .text(function(o){
+            if (o.group == 2){
+              return o.tag
+            } if (o.group == 3){
+              if (o.parent == "Power: Structural"){
+                return "Structural Influences"
+              } if (o.parent == "Power: Community"){
+                return "Community"
+              } if (o.parent == "Power: Individual"){
+                return "Power of the Individual"
+              } else {
+                return o.parent
+              }
+            }
+          })
+          .attr('opacity', (function(o){
+            if (o.group == 2){
+              return 1
+            } if (o.group == 3){
+              return 1
+            }
+          }))
+
+
+
+
+      graphNodes = graph.nodes.filter(function(d) {
+        if(d.group == 1){
+          for(i in d.parents){
+            tag = String(d.parents[i])
+            if (choices.includes(tag)){
+              if(!(nodes_list.includes(d.id))){ nodes_list.push(d.id) }
+              return d }
+          }
+        } else {
+          if (choices.includes(d.parent)){ return d }
+        }
+      });
+
+      graphLinks = graph.edges.filter(function(d) {
+          if (choices.includes(d.parent)){ return d }
+      });
+      restart();
+    }
+
+  function mouseOver(d) {
+      d3.select(".nodes")
+        .transition()
+        .duration(500)
+        .selectAll("circle")
+        .attr("opacity", (o) => opacityFunction(o, d))
+      d3.select(".nodes")
+        .transition()
+        .duration(500)
+        .selectAll("text")
+        .style("fill",'white')
+        .style("opacity", (o) => opacityFunction(o, d))
+      d3.select(".links")
+        .transition()
+        .duration(500)
+        .selectAll("path")
+        .style("fill-opacity", function(o){if(d.group ==  1 && (o.source.id == d.id || o.target.id == d.id)){return 0.3} else{return 0}})
+        .style("fill", function(o){if(d.group ==  1 && (o.source.id == d.id || o.target.id == d.id)){return color(o.parent)} else{return 'none'}})
+        .style("stroke-width", function(o){if(d.group ==  1 && (o.source.id == d.id || o.target.id == d.id)){return 1} else{return 0.05}})
+  }
+
+
+  function opacityFunction(o, d){
+        if (o.group == 1 && d.group == 2) {
+            if ((o.tags).includes(d.tag)) {
+              return 1
+            } else {
+            return 0.2
+          }
+        } if (o.group == 1 && d.group == 3) {
+            if ((o.parents).includes(d.parent)) {
+              return 1
+            } else {
+            return 0.2
+          }
+        } if (o.group == 2 && d.group == 2 && d.id != o.id) {
+            return 0.2
+          } if (o.group == 2 && d.group == 3){
+            if ((d.parent).includes(o.parent)) {
+              return 1
+            } else {
+            return 0.2
+          }
+        }
+        if (o.group == 3 && d.group == 1){
+            if ((d.parents).includes(o.parent)) {
+              return 1
+            } else {
+            return 0.2
+          }
+        }
+        if (o.group == 3 && d.group == 3 && d.id != o.id){
+            return 0.2
+          }
+      }
+
+
+  function restart() {
+    // Apply the general update pattern to the nodes.
+    node = node.data(graphNodes, function(d) { return d.id;});
+
+    node.exit().remove();
+
+    var newNode = svg.append("g")
+        .attr("class", "nodes")
+      .selectAll("g")
+      .data(graphNodes)
+      .enter().append("g")
+
+    var newCircle = newNode.append("circle")
+    		.attr("class", "node")
+        .data(graphNodes)
+        .style("fill", function(o){
+          if(choices.includes(o.parent)){
             if(o.group > 1){
               return color(o.parent)
-            } if(o.group == 1){
-              return "white"
-            }})
-
-            .attr("r", function(o){
-              if(o.group == 2){
-                return radius(o.degree)
-              } if(o.group == 1) {
-                  return 1 + Math.random() * 1
-              } if(o.group == 3) {
-                return ultra_radius(o.degree)
-              }
-            })
-          .on("click", function(d){
-            ecosystem_state = false;
-            if (d.focus == false) {
-              d.focus = true;
             } else {
-                d.focus = false
-            }})
-          .on("mouseover", (d) => mouseOver(d))
+              return "white"
+            }
+          } else {
+            return "black"
+          }})
+        .attr("fill-opacity", 1)
+        .attr("r", function(o){
+          if(o.group == 2){
+            return radius(o.degree)
+          } if(o.group == 1) {
+              return 1 + Math.random() * 1
+          } if(o.group == 3) {
+            return ultra_radius(o.degree)
+          }
+        })
+        .on("mouseover", function(d){
+          if (d.group == 1){
+          tooltip
+            .transition()
+          tooltip
+            .style("opacity", 1)
+            .style("font", "8px sans-serif")
+            .style("padding", "10px")
+            .html(graphNodes)
+            .style("left","100 px")
+            .style("top",  "100 px")
+            .html('<iframe src="https://embed.lvn.org/?hid=' + d.highlight + ' width="100%" height="425" scrolling="no" frameborder="no" style="max-width: 850px; margin: 0 auto; display: block"></iframe>')
+          console.log(tooltip)
+        }
+        mouseOver(d)
+      })
 
-          .on("mouseout", function(d) {
-            d3.select(".nodes")
-              .transition()
-              .duration(500)
-              .selectAll("circle")
-            d3.select(".links")
-              .data(graphLinks)
-                .enter().append("path")
-                .style("stroke", function(d){return color(d.target)})
-                .style('stroke-width', 0.05)
-                .style("fill", "none")
-          })
 
-        var theme_label = node.append("text")
+    var new_theme_label = newNode.append("text")
             .attr("class", "labels")
-            .data(graph.nodes)
+            .data(graphNodes)
             .attr("text-anchor", "middle")
             .attr("font-family", "sans-serif")
             .attr("font-size", o => ultra_radius_labels(o.degree))
             .attr('fill', 'white')
-            .text(function(o){
-              if (o.group == 2){
-                return o.tag
-              } if (o.group == 3){
+            .text(function(o){if (o.group == 2){ return o.tag }
+              if (o.group == 3){
                 if (o.parent == "Power: Structural"){
                   return "Structural Influences"
                 } if (o.parent == "Power: Community"){
@@ -358,188 +569,27 @@ d3.json("globalwe.json", function(error, graph) {
                 }
               }
             })
-            .attr('opacity', (function(o){
-              if (o.group == 2){
-                return 1
-              } if (o.group == 3){
-                return 1
-              }
-            }))
+            .attr('opacity', (function(o){ if (o.group > 1){ return 1 }}))
 
+    node = node.merge(newNode);
 
-      update();
+    // Apply the general update pattern to the links.
+    link = link.data(graphLinks, function(d) { return d.source.id + "-" + d.target.id; });
+    link.exit().remove();
+    var	newLink = link.enter().append("path")
+      .attr("class", "links")
+      .data(graphLinks)
+      .style("stroke", function(d){return color(d.parent)})
+      .style("stroke-width", 0.05)
+      // .style("stroke", "none")
+      .style('fill', "none")
+    link = link.merge(newLink);
 
-      function update(){
-        d3.selectAll(".myCheckbox").each(function(d){
-          cb = d3.select(this);
-          if(cb.property("checked") && !(choices.includes(cb.property("value")))){
-            choices.push(cb.property("value"))
-          } if (!(cb.property("checked")) && (choices.includes(cb.property("value")))){
-            var value_index = choices.indexOf(cb.property("value"));
-            choices.splice(value_index, 1)
-          }
-        });
-
-        graphNodes = graph.nodes.filter(function(d) {
-          if(d.group == 1){
-            for(i in d.parents){
-              tag = String(d.parents[i])
-              if (choices.includes(tag)){
-                if(!(nodes_list.includes(d.id))){ nodes_list.push(d.id) }
-                return d }
-            }
-          } else {
-            if (choices.includes(d.parent)){ return d }
-          }
-        });
-        graphLinks = graph.edges.filter(function(d) {
-            if (choices.includes(d.parent)){ return d }
-        });
-        restart();
-      }
-
-    function mouseOver(d) {
-        if (d.group == 1){
-          tooltip
-            .transition()
-          tooltip
-            .style("opacity", 1)
-            .style("font", "8px sans-serif")
-            .style("padding", "10px")
-            .html(graph.node)
-            .style("left", String(width - 450) + "px")
-            .style("top",  30 + "px")
-            .html('<iframe src="https://embed.lvn.org/?hid=' + d.highlight + ' width="100%" height="425" scrolling="no" frameborder="no" style="max-width: 850px; margin: 0 auto; display: block"></iframe>')
-        }
-
-        d3.select(".nodes")
-          .transition()
-          .duration(500)
-          .selectAll("circle")
-          .attr("opacity", (o) => opacityFunction(o, d))
-        d3.select(".nodes")
-          .transition()
-          .duration(500)
-          .selectAll("text")
-          .style("fill",'white')
-          .style("opacity", (o) => opacityFunction(o, d))
-        d3.select(".links")
-          .transition()
-          .duration(500)
-          .selectAll("path")
-          .style("fill-opacity", function(o){if(d.group ==  1 && (o.source.id == d.id || o.target.id == d.id)){return 0.3} else{return 0}})
-          .style("fill", function(o){if(d.group ==  1 && (o.source.id == d.id || o.target.id == d.id)){return color(o.parent)} else{return 'none'}})
-          .style("stroke-width", function(o){if(d.group ==  1 && (o.source.id == d.id || o.target.id == d.id)){return 1} else{return 0.05}})
-    }
-
-
-    function opacityFunction(o, d){
-          if (o.group == 1 && d.group == 2) {
-              if ((o.tags).includes(d.tag)) {
-                return 1
-              } else {
-              return 0.2
-            }
-          } if (o.group == 1 && d.group == 3) {
-              if ((o.parents).includes(d.parent)) {
-                return 1
-              } else {
-              return 0.2
-            }
-          } if (o.group == 2 && d.group == 2 && d.id != o.id) {
-              return 0.2
-            } if (o.group == 2 && d.group == 3){
-              if ((d.parent).includes(o.parent)) {
-                return 1
-              } else {
-              return 0.2
-            }
-          }
-          if (o.group == 3 && d.group == 1){
-              if ((d.parents).includes(o.parent)) {
-                return 1
-              } else {
-              return 0.2
-            }
-          }
-          if (o.group == 3 && d.group == 3 && d.id != o.id){
-              return 0.2
-            }
-        }
-
-
-    function restart() {
-      // Apply the general update pattern to the nodes.
-      node = node.data(graphNodes, function(d) { return d.id;});
-
-      node.exit().remove();
-
-      var newNode = svg.append("g")
-          .attr("class", "nodes")
-        .selectAll("g")
-        .data(graphNodes)
-        .enter().append("g")
-
-      var newCircle = newNode.append("circle")
-      		.attr("class", "node")
-          .data(graphNodes)
-          .style("fill", function(o){
-            if(o.group > 1){
-              return color(o.parent)
-            } else {
-              return "white"
-            }})
-          .attr("fill-opacity", function(o){
-            return 1
-          })
-          .attr("r", function(o){
-            if(o.group == 2){
-              return radius(o.degree)
-            } if(o.group == 1) {
-                return 1 + Math.random() * 1
-            } if(o.group == 3) {
-              return ultra_radius(o.degree)
-            }
-          })
-          .on("mouseover", (d) => mouseOver(d))
-
-
-      var new_theme_label = newNode.append("text")
-              .attr("class", "labels")
-              .data(graphNodes)
-              .attr("text-anchor", "middle")
-              .attr("font-family", "sans-serif")
-              .attr("font-size", o => ultra_radius_labels(o.degree))
-              .attr('fill', 'white')
-              .text(function(o){if (o.group == 2){ return o.tag }
-                if (o.group == 3){
-                  if (o.parent == "Power: Structural"){
-                    return "Structural Influences"
-                  } if (o.parent == "Power: Community"){
-                    return "Community"
-                  } if (o.parent == "Power: Individual"){
-                    return "Power of the Individual"
-                  } else {
-                    return o.parent
-                  }
-                }
-              })
-              .attr('opacity', (function(o){ if (o.group > 1){ return 1 }}))
-
-      node = node.merge(newNode);
-
-      // Apply the general update pattern to the links.
-      link = link.data(graphLinks, function(d) { return d.source.id + "-" + d.target.id; });
-      link.exit().remove();
-      var	newLink = link.enter().append("path")
-      		.attr("class", "link");
-      link = link.merge(newLink);
-
-      // Update and restart the simulation.
-      simulation.nodes(graphNodes);
-      simulation.force("link").links(graphLinks);
-      simulation.alpha(0.7).restart();
-    }
+    // Update and restart the simulation.
+    simulation.nodes(graphNodes);
+    simulation.force("link").links(graphLinks);
+    simulation.alpha(0.7).restart();
+  }
 
 });
 
