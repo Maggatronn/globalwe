@@ -52,22 +52,18 @@ body {
   position: relative;
 }
 </style>
-<link href="https://fonts.googleapis.com/css?family=Roboto:100,200,300,400,500,600,700,800,900" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Lato:100,200,300,400,500,600,700,800,900" rel="stylesheet">
 <svg>
 </svg>
 <div class="blocker"></div>
 <header>
   <h1>Global We Galaxy</h1>
 
-    <p>The voices of Global We are vast, complex, and interconnected.
-      How might we communicate that artistically? This question has guided the data art and visualization, Global We Galaxy.
-      Explore each voice, all it's interconnections, and the connections across various themes in this galaxy network graph.</p>
-    <p>Each white dot is one voice, and the colored dots are the themes that emerged throughout the conversations.
-    Every whitee dot is connected to the themes it is tagged with by colored lines. Forces then pull on the dots so those with similar patterns
-    and connections lie near one another.</p>
-    <p>Hover over each white dot to listen to that voice and see the themes it was tagged with. Hover over the colored dots to see
-      what voices have been tagged with what theme. Filter by parent themes by clicking the check boxes below to see how different themes and
-    subthemes interact. We recommend choosing no more than 3 parent themes at a time.</p>
+    <p>The Global We is a vast and intricate tapestry of voices that are interconnected in a complex manner. How can we capture and convey this artistic expression? This fundamental question has inspired the creation of Global We Galaxy, a work of data art and visualization.</p>
+
+    <p>Immerse yourself in this galaxy network graph, where each voice is represented by a white dot, and the emerging themes are depicted by colored dots. Every white dot is linked to the themes it is associated with through colored lines. The dots are influenced by forces that draw together those with similar patterns and connections, resulting in a spatial arrangement where related voices cluster together.</p>
+
+    <p>By hovering over each white dot, you can not only listen to that particular voice but also explore the themes it has been tagged with. Similarly, hovering over the colored dots reveals the voices that have been associated with each theme. To gain insights into the interactions between different themes and subthemes, you can filter by parent themes using the checkboxes below. We recommend selecting no more than three parent themes at a time to facilitate a comprehensive understanding of their interplay.</p>
       <div>
         <p><input type="checkbox" class="myCheckbox" value="Emotions" checked><label>Emotions</label></p>
         <p><input type="checkbox" class="myCheckbox" value="Power: Individual" unchecked><label>Power of the Individual</label></p>
@@ -185,7 +181,7 @@ var graphNodes = []
 var simulation = d3.forceSimulation()
     .force("link", d3.forceLink().id((d) => d.id).strength(1.5))
     .force("center", d3.forceCenter(width/2 + 150, height/2))
-    .force("charge", d3.forceManyBody().strength(-150))
+    .force("charge", d3.forceManyBody().distanceMax(450).strength(-100))
     .force("collide", d3.forceCollide(5))
 
 
