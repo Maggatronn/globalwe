@@ -5,14 +5,15 @@
 
 input.myCheckbox {
   color: white;
-  width: 20px;
-  height: 20px;
+  width: 15px;
+  height: 15px;
   top: 10em;
+  font-family: Lato;
 }
 label{
-  color: white;
+  /* color: white;
   font-family: Roboto;
-  top: 10em;
+  top: 10em; */
 
 }
 
@@ -24,12 +25,13 @@ svg {
 header {
   color: white;
   position: fixed;
-  font-family: Roboto;
+  font-family: Lato;
+  font-size: 0.8em;
   top: 0em
 }
 
 p {
-  width: 500px;
+  width: 300px;
 }
 
 div {
@@ -77,7 +79,6 @@ body {
 <body></body>
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/p5@1.5.0/lib/p5.js"></script>
 <script
   src="https://code.jquery.com/jquery-3.2.1.min.js"
   integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
@@ -129,7 +130,7 @@ var topics_dict = { 'Power: Individual': ['Messages',
   'Inspiration',
   'Sadness',
   'Curiosity'],
- 'Problems and Solutions': ['Hope for the Future',
+ 'Problems /n and /n Solutions': ['Hope for the Future',
   'Possible Solutions',
   'Urgent Problems',
   'Global Empathy',
@@ -179,10 +180,10 @@ var graphLinks = []
 var graphNodes = []
 
 var simulation = d3.forceSimulation()
-    .force("link", d3.forceLink().id((d) => d.id).strength(1.5))
+    .force("link", d3.forceLink().id((d) => d.id).strength(0.2))
     .force("center", d3.forceCenter(width/2 + 150, height/2))
-    .force("charge", d3.forceManyBody().distanceMax(450).strength(-100))
-    .force("collide", d3.forceCollide(5))
+    .force("charge", d3.forceManyBody().strength(-8))
+    .force("collide", d3.forceCollide(3))
 
 
 var loading = svg.append("text")
@@ -197,7 +198,7 @@ var loading = svg.append("text")
 var nodeByID = {};
 var n = 10000;
 // var topics_color = ["#F5770C", "#DE4600", "#E81C0C", "#F20C46", "#DB00A5", "#8E0CE8", "#0001DB", "#0C47F2", "#0C7DE8", "#00ACEB", "#0CF0F2"]
-var topics_color = ["#5D02D9", "#E803FC", "#FF009E", "#0F1FEF", "#0277D9", "#07FAF5"]
+var topics_color = ["#5D02D9", "#C202D4", "#D90086", "#0F1FEF", "#0273CF", "#247D7D"]
 // var topics_color = ["#85457C", "#F58A07", "#909CC2", "#AE759F", "#C38D94", "#D36135"]
 var color = d3.scaleOrdinal().domain(Object.keys(topics_dict)).range(topics_color)
 var ultra_radius_labels = d3.scaleLinear().domain([0,700]).range([10,20])
@@ -248,7 +249,7 @@ d3.json("globalwe.json", function(error, graph) {
 
   var tooltip = d3.select("body").append("g")
      .style("opacity", 0)
-     .style("font", "8px sans-serif")
+     .style("font", "8px Lato")
      .attr("x", 0)
      .attr("y", 0)
      .style("position", "absolute")
@@ -266,28 +267,24 @@ d3.json("globalwe.json", function(error, graph) {
           .transition()
           .duration(500)
           .style("opacity", 0)
+          .attr("x", 0)
+          .attr("y", 0)
         d3.select(".nodes")
           .transition()
           .duration(500)
           .selectAll("circle")
-          .style("fill-opacity", 1)
+          .attr("opacity", 0.6)
         d3.select(".nodes")
           .transition()
           .duration(500)
           .selectAll("text")
-          .style("opacity", (function(o){
-            if (o.group == 2){
-              return 1
-            } if (o.group == 3){
-              return 1
-            }
-          }))
+          .attr("opacity", 1)
         d3.select(".links")
           .transition()
           .duration(500)
-          .selectAll("path")
-          .style("stroke", function(d){return color(d.parent)})
-          .style("stroke-width", 0.1)
+          .selectAll("line")
+          .attr("stroke", function(d){return color(d.parent)})
+          .attr("stroke-width", 0.1)
           .style('fill', "none")
 
         });
@@ -296,14 +293,14 @@ d3.json("globalwe.json", function(error, graph) {
 
   link = svg.append("g")
       .attr("class", "links")
-    .selectAll("path")
+    .selectAll("line")
     .data(graphLinks)
     .enter()
-    .append("path")
-    .style("stroke", function(d){return color(d.parent)})
-    .style("stroke-width", 0.05)
+    .append("line")
+    .attr("stroke", function(d){return color(d.parent)})
+    .attr("stroke-width", 0.05)
     // .style("stroke", "none")
-    .style('fill', "none")
+    // .style('fill', "none")
 
   node = svg.append("g")
       .attr("class", "nodes")
@@ -336,6 +333,15 @@ d3.json("globalwe.json", function(error, graph) {
             return "white"
           }
         })
+        .attr('opacity', (function(o){
+          if (o.group == 2){
+            return 1
+          } if (o.group == 3){
+            return 1
+          } else {
+            return 0.6
+          }
+        }))
 
       .attr("r", function(o){
         if(o.group == 2){
@@ -359,7 +365,7 @@ d3.json("globalwe.json", function(error, graph) {
             .transition()
           tooltip
             .style("opacity", 1)
-            .style("font", "8px sans-serif")
+            .style("font", "8px Lato")
             .style("padding", "10px")
             .html(graphNodes)
             .style("left", width - 350 + "px")
@@ -377,25 +383,27 @@ d3.json("globalwe.json", function(error, graph) {
           .selectAll("circle")
         d3.select(".links")
           .data(graphLinks)
-            .enter().append("path")
-            .style("stroke", function(d){return color(d.target)})
-            .style('stroke-width', 0.05)
-            .style("fill", "none")
+            .enter().append("line")
+            .attr("stroke", function(d){return color(d.target)})
+            .attr('stroke-width', 0.05)
+            .attr("fill", "none")
       })
 
       var theme_label = node.append("text")
           .attr("class", "labels")
           .data(graphNodes)
           .attr("text-anchor", "middle")
-          .attr("font-family", "Roboto")
+          .attr("font-family", "Lato")
           .attr("font-size", o => ultra_radius_labels(o.degree))
           .attr('fill', 'white')
+          .attr('width', '10px')
+          .attr('word-wrap', 'break-word')
           .text(function(o){
             if (o.group == 2){
               return o.tag
             } if (o.group == 3){
               if (o.parent == "Power: Structural"){
-                return "Structural Influences"
+                return "Structural\n Influences"
               } if (o.parent == "Power: Community"){
                 return "Community"
               } if (o.parent == "Power: Individual"){
@@ -410,6 +418,8 @@ d3.json("globalwe.json", function(error, graph) {
               return 1
             } if (o.group == 3){
               return 1
+            } else {
+              return 0.6
             }
           }))
 
@@ -436,6 +446,7 @@ d3.json("globalwe.json", function(error, graph) {
     }
 
   function mouseOver(d) {
+      console.log(d)
       d3.select(".nodes")
         .transition()
         .duration(500)
@@ -445,32 +456,55 @@ d3.json("globalwe.json", function(error, graph) {
         .transition()
         .duration(500)
         .selectAll("text")
-        .style("fill",'white')
-        .style("opacity", (o) => opacityFunction(o, d))
+        .attr("fill",'white')
+        .attr("opacity", (o) => opacityFunction(o, d))
       d3.select(".links")
         .transition()
         .duration(500)
-        .selectAll("path")
-        .style("fill-opacity", function(o){if(d.group ==  1 && (o.source.id == d.id || o.target.id == d.id)){return 0.3} else{return 0}})
-        .style("fill", function(o){if(d.group ==  1 && (o.source.id == d.id || o.target.id == d.id)){return color(o.parent)} else{return 'none'}})
-        .style("stroke-width", function(o){if(d.group ==  1 && (o.source.id == d.id || o.target.id == d.id)){return 1} else{return 0.05}})
+        .selectAll("line")
+        .attr("fill-opacity", function(o){if(d.group ==  1 && (o.source.id == d.id || o.target.id == d.id)){return 0.3} else{return 0}})
+        .attr("fill", function(o){if(d.group ==  1 && (o.source.id == d.id || o.target.id == d.id)){return color(o.parent)} else{return 'none'}})
+        .attr("stroke-width", function(o){if(d.group ==  1 && (o.source.id == d.id || o.target.id == d.id)){return 1} else{return 0.05}})
   }
 
 
   function opacityFunction(o, d){
-        if (o.group == 1 && d.group == 2) {
-            if ((o.tags).includes(d.tag)) {
-              return 1
-            } else {
-            return 0.2
-          }
-        } if (o.group == 1 && d.group == 3) {
+
+       if (o.group == 1 && d.group == 1 && d.id != o.id) {
+         return 0.3 }
+        if (o.group == 1 && d.group == 3) {
+            console.log('made it')
             if ((o.parents).includes(d.parent)) {
               return 1
             } else {
             return 0.2
           }
-        } if (o.group == 2 && d.group == 2 && d.id != o.id) {
+        } if (o.group == 1 && d.group == 2) {
+             if ((o.tags).includes(d.tag)) {
+               return 1
+             } else {
+             return 0.2
+           }
+
+         } if (o.group == 2 && d.group == 1) {
+
+              if ((d.tags).includes(o.tag)) {
+                return 1
+              } else {
+              return 0.2
+            }
+
+          }
+          if (o.group == 2 && d.group == 3) {
+
+               if ((d.parents).includes(o.parent)) {
+                 return 1
+               } else {
+               return 0.2
+             }
+
+           }
+         if (o.group == 2 && d.group == 2 && d.id != o.id) {
             return 0.2
           } if (o.group == 2 && d.group == 3){
             if ((d.parent).includes(o.parent)) {
@@ -497,7 +531,6 @@ d3.json("globalwe.json", function(error, graph) {
     node = node.data(graphNodes, function(d) { return d.id;});
 
     node.exit().remove();
-
     var newNode = svg.append("g")
         .attr("class", "nodes")
       .selectAll("g")
@@ -507,7 +540,7 @@ d3.json("globalwe.json", function(error, graph) {
     var newCircle = newNode.append("circle")
     		.attr("class", "node")
         .data(graphNodes)
-        .style("fill", function(o){
+        .attr("fill", function(o){
           if(choices.includes(o.parent)){
             if(o.group > 1){
               return color(o.parent)
@@ -515,9 +548,10 @@ d3.json("globalwe.json", function(error, graph) {
               return "white"
             }
           } else {
-            return "black"
-          }})
-        .attr("fill-opacity", 1)
+            return "white"
+          }
+        })
+        .attr("fill-opacity", 0.6)
         .attr("r", function(o){
           if(o.group == 2){
             return radius(o.degree)
@@ -533,7 +567,7 @@ d3.json("globalwe.json", function(error, graph) {
             .transition()
           tooltip
             .style("opacity", 1)
-            .style("font", "8px sans-serif")
+            .style("font", "8px Lato")
             .style("padding", "10px")
             .html(graphNodes)
             .style("left","100 px")
@@ -545,11 +579,14 @@ d3.json("globalwe.json", function(error, graph) {
       })
 
 
+
+    node = node.merge(newNode);
+
     var new_theme_label = newNode.append("text")
             .attr("class", "labels")
             .data(graphNodes)
             .attr("text-anchor", "middle")
-            .attr("font-family", "sans-serif")
+            .attr("font-family", "Lato")
             .attr("font-size", o => ultra_radius_labels(o.degree))
             .attr('fill', 'white')
             .text(function(o){if (o.group == 2){ return o.tag }
@@ -567,52 +604,56 @@ d3.json("globalwe.json", function(error, graph) {
             })
             .attr('opacity', (function(o){ if (o.group > 1){ return 1 }}))
 
-    node = node.merge(newNode);
-
     // Apply the general update pattern to the links.
     link = link.data(graphLinks, function(d) { return d.source.id + "-" + d.target.id; });
     link.exit().remove();
-    var	newLink = link.enter().append("path")
+    var	newLink = link.enter().append("line")
       .attr("class", "links")
       .data(graphLinks)
-      .style("stroke", function(d){return color(d.parent)})
-      .style("stroke-width", 0.05)
+      .attr("stroke", function(d){return color(d.parent)})
+      .attr("stroke-width", 0.05)
       // .style("stroke", "none")
-      .style('fill', "none")
+      .attr('fill', "none")
     link = link.merge(newLink);
 
     // Update and restart the simulation.
     simulation.nodes(graphNodes);
     simulation.force("link").links(graphLinks);
-    simulation.alpha(0.7).restart();
+    simulation.alpha(1).restart();
+    console.log(node)
   }
 
 });
 
 function ticked(data) {
     link
-      .attr("d", function(d) {
-        var offset = 200;
-
-        var midpoint_x = (d.source.x + d.target.x) / 2;
-        var midpoint_y = (d.source.y + d.target.y) / 2;
-
-        var dx = (d.target.x - d.source.x);
-        var dy = (d.target.y - d.source.y);
-
-        var normalise = Math.sqrt((dx * dx) + (dy * dy));
-        if (normalise > 0){
-          var offSetX = midpoint_x + offset*(dy/normalise);
-          var offSetY = midpoint_y - offset*(dx/normalise);
-        } else {
-          var offSetX = midpoint_x + offset*(dy);
-          var offSetY = midpoint_y - offset*(dx);
-        }
-
-        return "M" + d.source.x + "," + d.source.y +
-            "S" + offSetX + "," + offSetY +
-            " " + d.target.x + "," + d.target.y;
-        });
+      .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+        // IF WE RETURN TO PATH AND CURVE, USE THE CODE BELOW
+      // .attr("d", function(d) {
+      //   var offset = 200;
+      //
+      //   var midpoint_x = (d.source.x + d.target.x) / 2;
+      //   var midpoint_y = (d.source.y + d.target.y) / 2;
+      //
+      //   var dx = (d.target.x - d.source.x);
+      //   var dy = (d.target.y - d.source.y);
+      //
+      //   var normalise = Math.sqrt((dx * dx) + (dy * dy));
+      //   if (normalise > 0){
+      //     var offSetX = midpoint_x + offset*(dy/normalise);
+      //     var offSetY = midpoint_y - offset*(dx/normalise);
+      //   } else {
+      //     var offSetX = midpoint_x + offset*(dy);
+      //     var offSetY = midpoint_y - offset*(dx);
+      //   }
+      //
+      //   return "M" + d.source.x + "," + d.source.y +
+      //       "S" + offSetX + "," + offSetY +
+      //       " " + d.target.x + "," + d.target.y;
+      //   });
 
     node
         .attr("transform", function(d) {
