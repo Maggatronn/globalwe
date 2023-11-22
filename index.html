@@ -61,11 +61,17 @@ body {
 <header>
   <h1>Global We Galaxy</h1>
 
-    <p>The Global We is a vast and intricate tapestry of voices that are interconnected in a complex manner. How can we capture and convey this artistic expression? This fundamental question has inspired the creation of Global We Galaxy, a work of data art and visualization.</p>
+    <p>Through this data visualisation you can interactively explore the rich tapestry of interconnected voices and themes across conversations globally:
 
-    <p>Immerse yourself in this galaxy network graph, where each voice is represented by a white dot, and the emerging themes are depicted by colored dots. Every white dot is linked to the themes it is associated with through colored lines. The dots are influenced by forces that draw together those with similar patterns and connections, resulting in a spatial arrangement where related voices cluster together.</p>
+    <p>     1. Each white dot represents an individual voice, while colored dots represent the themes that emerged from various conversations.<p>
 
-    <p>By hovering over each white dot, you can not only listen to that particular voice but also explore the themes it has been tagged with. Similarly, hovering over the colored dots reveals the voices that have been associated with each theme. To gain insights into the interactions between different themes and subthemes, you can filter by parent themes using the checkboxes below. We recommend selecting no more than three parent themes at a time to facilitate a comprehensive understanding of their interplay.</p>
+    <p>     2. The white dots are connected to themes through colored lines. They group together based on similarities among these voices.<p>
+
+    <p>     3. When you hover over a white dot, you can hear that voice and see the themes it's associated with.<p>
+
+    <p>     4. Hovering over colored dots allows you to see which voices are connected to those specific themes.<p>
+
+    <p>     5. To focus on specific themes, you can use the checkboxes. Select up to three parent themes at a time to explore how different themes and their subthemes interact.</p>
       <div>
         <p><input type="checkbox" class="myCheckbox" value="Emotions" checked><label>Emotions</label></p>
         <p><input type="checkbox" class="myCheckbox" value="Power: Individual" unchecked><label>Power of the Individual</label></p>
@@ -182,7 +188,7 @@ var graphNodes = []
 var simulation = d3.forceSimulation()
     .force("link", d3.forceLink().id((d) => d.id).strength(0.2))
     .force("center", d3.forceCenter(width/2 + 150, height/2))
-    .force("charge", d3.forceManyBody().strength(-8))
+    .force("charge", d3.forceManyBody().strength(-12))
     .force("collide", d3.forceCollide(3))
 
 
@@ -368,9 +374,10 @@ d3.json("globalwe.json", function(error, graph) {
             .style("font", "8px Lato")
             .style("padding", "10px")
             .html(graphNodes)
-            .style("left", width - 350 + "px")
+            .style("left", width - 1000 + "px")
+            .style("width"," 1000px")
             .style("top",  "100 px")
-            .html('<iframe src="https://embed.lvn.org/?hid=' + d.highlight + ' width="100%" height="425" scrolling="no" frameborder="no" style="max-width: 850px; margin: 0 auto; display: block"></iframe>')
+            .html('<iframe src="https://embed.lvn.org/?hid=' + d.highlight + ' width="100%" height="525" scrolling="no" frameborder="no" style="max-width: 950px; margin: 0 auto; display: block"></iframe>')
           console.log(d.highlight)
         }
         mouseOver(d)
